@@ -238,12 +238,12 @@ body::before {
 }
 
 .btn-cart{
-    background:#d60000;
+    background:#000000;
     color:#ffffff;
 }
 
 .btn-cart:hover{
-    background:#aa0000;
+    background:#212121;
 }
 
 /* FOOTER */
