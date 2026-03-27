@@ -7,7 +7,7 @@ export function Logo() {
       {/* Usamos a tag <a> provisoriamente. No futuro, trocaremos pelo Link do React Router */}
       <a className={styles.logoLink} href='#'>
         <TimerIcon />
-        <span>Chronos</span>
+        <span>Kratos Pomodoro</span>
       </a>
     </div>
   );

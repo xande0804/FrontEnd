@@ -19,6 +19,10 @@
   transition: all 0.1s ease-in-out; /* Transição suave */
 }
 
+.logoLink span{
+  color: var(--text-over-primary);
+}
+
 /* Efeito ao passar o mouse: escurece a cor primária em 50% */
 .logoLink:hover {
   filter: brightness(80%);
