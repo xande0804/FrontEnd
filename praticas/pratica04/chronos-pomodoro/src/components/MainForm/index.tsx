@@ -2,33 +2,79 @@ import { PlayCircleIcon } from 'lucide-react';
 import { Cycles } from '../Cycles';
 import { DefaultButton } from '../DefaultButton';
 import { DefaultInput } from '../DefaultInput';
-import { useTaskContext } from '../../contexts/TaskContext/useTaskContext';
-
-// 1. Trocamos o import do useState pelo useRef
 import { useRef } from 'react';
+import type { TaskModel } from '../../models/TaskModel';
+import { useTaskContext } from '../../contexts/TaskContext/useTaskContext';
+import { getNextCycle } from '../../utils/getNextCycle';
 
 export function MainForm() {
-  const { setState } = useTaskContext();
+  // 2. Agora precisamos puxar o 'state' também, além do 'setState'
+  const { state, setState } = useTaskContext();
 
-  // 2. Criamos a referência e tipamos para o TypeScript saber que é um input
   const taskNameInput = useRef<HTMLInputElement>(null);
+
+  // 3. Calculamos o próximo ciclo ANTES do usuário fazer qualquer coisa.
+  // Como o estado inicial é 0, o nextCycle já começa valendo 1.
+  const nextCycle = getNextCycle(state.currentCycle);
 
   function handleCreateNewTask(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    // 4. No momento do envio, acessamos o elemento HTML (.current) e pegamos o valor (.value)
-    console.log('DEU CERTO', taskNameInput.current?.value);
+    if (taskNameInput.current === null) return;
+    const taskName = taskNameInput.current.value.trim();
+    if (!taskName) {
+      alert('Digite o nome da tarefa');
+      return;
+    }
+
+    const newTask: TaskModel = {
+      id: Date.now().toString(),
+      name: taskName,
+      startDate: Date.now(),
+      completeDate: null,
+      interruptDate: null,
+      duration: 1,
+      type: 'workTime',
+    };
+
+    const secondsRemaining = newTask.duration * 60;
+
+    setState(prevState => {
+      return {
+        ...prevState,
+        config: { ...prevState.config },
+        activeTask: newTask,
+
+        // 4. Substituímos o valor fixo '1' pela nossa variável calculada
+        currentCycle: nextCycle,
+
+        secondsRemaining, // Conferir depois
+        formattedSecondsRemaining: '00:00', // Conferir depois
+        tasks: [...prevState.tasks, newTask],
+      };
+    });
+  }
+
+  function handleClick() {
+    setState(prevState => {
+      return {
+        ...prevState,
+        formattedSecondsRemaining: '21:00',
+      };
+    });
   }
 
   return (
     <form onSubmit={handleCreateNewTask} className='form' action=''>
+      <button onClick={handleClick} type='button'>
+        Clicar
+      </button>
       <div className='formRow'>
         <DefaultInput
           labelText='task'
           id='meuInput'
           type='text'
           placeholder='Digite algo'
-          // 3. Removemos o 'value' e o 'onChange', e passamos a nossa ref para o input
           ref={taskNameInput}
         />
       </div>
