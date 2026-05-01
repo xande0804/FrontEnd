@@ -1,22 +1,49 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import { initialTaskState } from './initialTaskState';
+import { taskReducer } from './taskReducer';
 import { TaskContext } from './TaskContext';
-
+import { TimerWorkerManager } from '../../workers/TimerWorkerManager';
+import { TaskActionTypes } from './TaskActions';
 
 type TaskContextProviderProps = {
   children: React.ReactNode;
 };
 
 export function TaskContextProvider({ children }: TaskContextProviderProps) {
-  const [state, setState] = useState(initialTaskState);
+  const [state, dispatch] = useReducer(taskReducer, initialTaskState);
+  const worker = TimerWorkerManager.getInstance();
 
-  // O "Espião": Executa o console.log toda vez que a variável 'state' for alterada
   useEffect(() => {
-    console.log('ESTADO ATUALIZADO:', state);
-  }, [state]);
+    worker.onmessage(e => {
+      const countDownSeconds = e.data;
+
+      if (countDownSeconds <= 0) {
+        dispatch({
+          type: TaskActionTypes.COMPLETE_TASK,
+        });
+
+        worker.terminate();
+      } else {
+        dispatch({
+          type: TaskActionTypes.COUNT_DOWN,
+          payload: { secondsRemaining: countDownSeconds },
+        });
+      }
+    });
+  }, [worker]);
+
+  useEffect(() => {
+  if (!state.activeTask) {
+    worker.terminate();
+    return;
+  }
+
+  worker.postMessage(state);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [worker, state.activeTask]);
 
   return (
-    <TaskContext.Provider value={{ state, setState }}>
+    <TaskContext.Provider value={{ state, dispatch }}>
       {children}
     </TaskContext.Provider>
   );

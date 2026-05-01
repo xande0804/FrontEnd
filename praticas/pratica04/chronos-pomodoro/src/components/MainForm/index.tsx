@@ -1,27 +1,31 @@
-import { PlayCircleIcon } from 'lucide-react';
+import { PlayCircleIcon, StopCircleIcon } from 'lucide-react';
 import { Cycles } from '../Cycles';
 import { DefaultButton } from '../DefaultButton';
 import { DefaultInput } from '../DefaultInput';
 import { useRef } from 'react';
 import type { TaskModel } from '../../models/TaskModel';
-import { useTaskContext } from '../../contexts/TaskContext/useTaskContext';
+import { useTaskContext } from '../../contexts/TaskContext';
 import { getNextCycle } from '../../utils/getNextCycle';
+import { getNextCycleType } from '../../utils/getNextCycleType';
+import { Tips } from '../Tips';
+import { TaskActionTypes } from '../../contexts/TaskContext/TaskActions';
+import { TimerWorkerManager } from '../../workers/TimerWorkerManager';
 
 export function MainForm() {
-  // 2. Agora precisamos puxar o 'state' também, além do 'setState'
-  const { state, setState } = useTaskContext();
-
+  const { state, dispatch } = useTaskContext();
   const taskNameInput = useRef<HTMLInputElement>(null);
 
-  // 3. Calculamos o próximo ciclo ANTES do usuário fazer qualquer coisa.
-  // Como o estado inicial é 0, o nextCycle já começa valendo 1.
+  // ciclos
   const nextCycle = getNextCycle(state.currentCycle);
+  const nextCycleType = getNextCycleType(nextCycle);
 
   function handleCreateNewTask(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (taskNameInput.current === null) return;
+
     const taskName = taskNameInput.current.value.trim();
+
     if (!taskName) {
       alert('Digite o nome da tarefa');
       return;
@@ -33,42 +37,28 @@ export function MainForm() {
       startDate: Date.now(),
       completeDate: null,
       interruptDate: null,
-      duration: 1,
-      type: 'workTime',
+      duration: state.config[nextCycleType],
+      type: nextCycleType,
     };
 
-    const secondsRemaining = newTask.duration * 60;
+    // dispatch da tarefa
+    dispatch({ type: TaskActionTypes.START_TASK, payload: newTask });
 
-    setState(prevState => {
-      return {
-        ...prevState,
-        config: { ...prevState.config },
-        activeTask: newTask,
+    // worker
+    const timerWorkerManager = TimerWorkerManager.getInstance();
 
-        // 4. Substituímos o valor fixo '1' pela nossa variável calculada
-        currentCycle: nextCycle,
-
-        secondsRemaining, // Conferir depois
-        formattedSecondsRemaining: '00:00', // Conferir depois
-        tasks: [...prevState.tasks, newTask],
-      };
+    timerWorkerManager.onmessage(event => {
+      console.log('PRINCIPAL recebeu:', event.data);
     });
   }
 
-  function handleClick() {
-    setState(prevState => {
-      return {
-        ...prevState,
-        formattedSecondsRemaining: '21:00',
-      };
-    });
+  function handleInterruptTask() {
+    // Disparamos a ação sem payload!
+    dispatch({ type: TaskActionTypes.INTERRUPT_TASK });
   }
 
   return (
     <form onSubmit={handleCreateNewTask} className='form' action=''>
-      <button onClick={handleClick} type='button'>
-        Clicar
-      </button>
       <div className='formRow'>
         <DefaultInput
           labelText='task'
@@ -76,19 +66,44 @@ export function MainForm() {
           type='text'
           placeholder='Digite algo'
           ref={taskNameInput}
+          disabled={!!state.activeTask}
         />
       </div>
 
       <div className='formRow'>
-        <p>Próximo intervalo é de 25min</p>
+        <Tips />
       </div>
 
-      <div className='formRow'>
-        <Cycles />
-      </div>
+      {/* Só renderiza a div com os ciclos SE o currentCycle for maior que zero */}
+      {state.currentCycle > 0 && (
+        <div className='formRow'>
+          <Cycles />
+        </div>
+      )}
 
       <div className='formRow'>
-        <DefaultButton icon={<PlayCircleIcon />} />
+        {/* Renderiza apenas se NÃO houver tarefa ativa */}
+        {!state.activeTask && (
+          <DefaultButton
+            aria-label='Iniciar nova tarefa'
+            title='Iniciar nova tarefa'
+            type='submit'
+            icon={<PlayCircleIcon />}
+          />
+        )}
+
+        {/* Renderiza apenas se HOUVER tarefa ativa */}
+        {!!state.activeTask && (
+          <DefaultButton
+            aria-label='Interromper tarefa atual'
+            title='Interromper tarefa atual'
+            type='button'
+            color='red'
+            icon={<StopCircleIcon />}
+            onClick={handleInterruptTask}
+            key='botao_button' // A chave mágica que evita a confusão do React!
+          />
+        )}
       </div>
     </form>
   );

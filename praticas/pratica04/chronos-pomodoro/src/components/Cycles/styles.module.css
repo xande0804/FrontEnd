@@ -21,13 +21,14 @@
   border-radius: 50%; /* Transforma o quadrado em círculo */
 }
 
-/* Cores específicas para os diferentes tipos de ciclo */
 .workTime {
-  background: var(--warning);
+  background: var(--primary);        /* foco → vermelho (ação principal) */
 }
+
 .shortBreakTime {
-  background: var(--primary);
+  background: var(--primary-light);  /* pausa leve → dourado claro */
 }
+
 .longBreakTime {
-  background: var(--info);
+  background: var(--warning);        /* pausa longa → dourado mais forte */
 }
