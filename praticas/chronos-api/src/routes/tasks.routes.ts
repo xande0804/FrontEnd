@@ -4,31 +4,37 @@ import { prisma } from '../lib/prisma';
 export const tasksRouter = Router();
 
 tasksRouter.post('/', async (request, response) => {
-  const { id, name, duration, type, startDate } = request.body;
-
-  if (
-    !id ||
-    !name ||
-    typeof duration !== 'number' ||
-    !type ||
-    !startDate
-  ) {
-    return response.status(400).json({
-      error: 'Dados inválidos',
-    });
-  }
-
-  const task = await prisma.task.create({
-    data: {
-      id,
-      name,
-      duration,
-      type,
-      startDate: new Date(startDate),
-    },
-  });
-
-  return response.status(201).json(task);
+    const { id, name, duration, type, startDate } = request.body;
+  
+    if (
+      !id ||
+      !name ||
+      typeof duration !== 'number' ||
+      !type ||
+      !startDate
+    ) {
+      return response.status(400).json({
+        error: 'Dados inválidos',
+      });
+    }
+  
+    try {
+      const task = await prisma.task.create({
+        data: {
+          id,
+          name,
+          duration,
+          type,
+          startDate: new Date(startDate),
+        },
+      });
+  
+      return response.status(201).json(task);
+    } catch {
+      return response.status(409).json({
+        error: 'Task já existe',
+      });
+    }
 });
 
 tasksRouter.get('/', async (_request, response) => {
@@ -51,16 +57,22 @@ tasksRouter.patch('/:id/complete', async (request, response) => {
       });
     }
   
-    const task = await prisma.task.update({
-      where: {
-        id,
-      },
-      data: {
-        completeDate: new Date(completeDate),
-      },
-    });
+    try {
+      const task = await prisma.task.update({
+        where: {
+          id,
+        },
+        data: {
+          completeDate: new Date(completeDate),
+        },
+      });
   
-    return response.json(task);
+      return response.json(task);
+    } catch {
+      return response.status(404).json({
+        error: 'Task não encontrada',
+      });
+    }
 });
 
 tasksRouter.patch('/:id/interrupt', async (request, response) => {
@@ -73,16 +85,22 @@ tasksRouter.patch('/:id/interrupt', async (request, response) => {
       });
     }
   
-    const task = await prisma.task.update({
-      where: {
-        id,
-      },
-      data: {
-        interruptDate: new Date(interruptDate),
-      },
-    });
+    try {
+      const task = await prisma.task.update({
+        where: {
+          id,
+        },
+        data: {
+          interruptDate: new Date(interruptDate),
+        },
+      });
   
-    return response.json(task);
+      return response.json(task);
+    } catch {
+      return response.status(404).json({
+        error: 'Task não encontrada',
+      });
+    }
 });
 
 tasksRouter.delete('/', async (_request, response) => {
