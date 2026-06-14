@@ -10,13 +10,16 @@ import { getNextCycleType } from '../../utils/getNextCycleType';
 import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
 import { Tips } from '../Tips';
 import { showMessage } from '../../adapters/showMessage';
+import { createTask, interruptTask } from '../../services/api';
 
 export function MainForm() {
   const { state, dispatch } = useTaskContext();
   const taskNameInput = useRef<HTMLInputElement>(null);
   const lastTaskName = state.tasks[state.tasks.length - 1]?.name || '';
 
-  function handleCreateNewTask(event: React.FormEvent<HTMLFormElement>) {
+  async function handleCreateNewTask(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
     showMessage.dismiss();
 
@@ -42,14 +45,39 @@ export function MainForm() {
       type: nextCyleType,
     };
 
-    dispatch({ type: TaskActionTypes.START_TASK, payload: newTask });
-    showMessage.success('Tarefa iniciada');
+    try {
+      await createTask(newTask);
+
+      dispatch({
+        type: TaskActionTypes.START_TASK,
+        payload: newTask,
+      });
+
+      showMessage.success('Tarefa iniciada');
+    } catch {
+      showMessage.error('Erro ao criar tarefa');
+    }
   }
 
-  function handleInterruptTask() {
+  async function handleInterruptTask() {
     showMessage.dismiss();
-    showMessage.error('Tarefa interrompida!');
-    dispatch({ type: TaskActionTypes.INTERRUPT_TASK });
+
+    if (!state.activeTask) return;
+
+    try {
+      await interruptTask(
+        state.activeTask.id,
+        Date.now(),
+      );
+
+      dispatch({
+        type: TaskActionTypes.INTERRUPT_TASK,
+      });
+
+      showMessage.error('Tarefa interrompida!');
+    } catch {
+      showMessage.error('Erro ao interromper tarefa');
+    }
   }
 
   return (

@@ -12,10 +12,10 @@ import { sortTasks, type SortTasksOptions } from '../../utils/sortTasks';
 import { useEffect, useState } from 'react';
 import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
 import { showMessage } from '../../adapters/showMessage';
+import { clearTasks } from '../../services/api';
 
 export function History() {
   const { state, dispatch } = useTaskContext();
-  const [confirmClearHistory, setConfirmClearHistory] = useState(false);
   const hasTasks = state.tasks.length > 0;
 
   const [sortTasksOptions, setSortTaskOptions] = useState<SortTasksOptions>(
@@ -44,14 +44,6 @@ export function History() {
   }, []);
 
   useEffect(() => {
-    if (!confirmClearHistory) return;
-
-    setConfirmClearHistory(false);
-
-    dispatch({ type: TaskActionTypes.RESET_STATE });
-  }, [confirmClearHistory, dispatch]);
-
-  useEffect(() => {
     return () => {
       showMessage.dismiss();
     };
@@ -71,10 +63,23 @@ export function History() {
     });
   }
 
-  function handleResetHistory() {
+  async function handleResetHistory() {
     showMessage.dismiss();
-    showMessage.confirm('Tem certeza?', confirmation => {
-      setConfirmClearHistory(confirmation);
+
+    showMessage.confirm('Tem certeza?', async confirmation => {
+      if (!confirmation) return;
+
+      try {
+        await clearTasks();
+
+        dispatch({
+          type: TaskActionTypes.RESET_STATE,
+        });
+
+        showMessage.success('Histórico apagado');
+      } catch {
+        showMessage.error('Erro ao apagar histórico');
+      }
     });
   }
 
