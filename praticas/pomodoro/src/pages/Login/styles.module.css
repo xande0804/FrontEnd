@@ -1,0 +1,141 @@
+.loginPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 3.2rem 0;
+}
+
+.logoWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3.2rem;
+}
+
+.loginCard {
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 3.2rem;
+  border-radius: 0.8rem;
+  background: var(--gray-800);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2.4rem;
+}
+
+.header h1 {
+  font-size: 2.4rem;
+  margin-bottom: 0.8rem;
+}
+
+.header p {
+  color: var(--gray-300);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.submitButton {
+  margin-top: 0.8rem;
+  padding: 1.2rem;
+  border: 0;
+  border-radius: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--primary);
+  color: var(--gray-100);
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.6rem;
+  margin-top: 2.4rem;
+}
+
+.actions button,
+.simulationBox button {
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.feedbackMessage {
+  margin-top: 2.4rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.simulationBox {
+  text-align: center;
+}
+
+.simulationBox h1 {
+  font-size: 2.4rem;
+  margin-bottom: 1.6rem;
+}
+
+.simulationBox p {
+  color: var(--gray-300);
+  margin-bottom: 2.4rem;
+}
+
+.tokenContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin: 1rem 0;
+
+  padding: 1rem;
+
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tokenValue {
+  flex: 1;
+
+  font-size: 0.9rem;
+
+  word-break: break-all;
+}
+
+.copyButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  border: none;
+  border-radius: 6px;
+
+  padding: 0.75rem;
+
+  background: transparent;
+  color: var(--primary-color);
+
+  transition: 0.2s;
+}
+
+.copyButton:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
