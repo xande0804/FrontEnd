@@ -7,6 +7,8 @@ import { Home } from '../../pages/Home';
 import { Login } from '../../pages/Login';
 import { NotFound } from '../../pages/NotFound';
 import { Settings } from '../../pages/Settings';
+import { Register } from '../../pages/Register';
+import { ForgotPassword } from '../../pages/ForgotPassword';
 
 import { ProtectedRoute } from '../../components/ProtectedRoute';
 import { PublicOnlyRoute } from '../../components/PublicOnlyRoute';
@@ -67,6 +69,24 @@ export function MainRouter() {
             <ProtectedRoute>
               <AboutPomodoro />
             </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path='/register'
+          element={
+            <PublicOnlyRoute>
+              <Register />
+            </PublicOnlyRoute>
+          }
+        />
+
+        <Route
+          path='/forgot-password'
+          element={
+            <PublicOnlyRoute>
+              <ForgotPassword />
+            </PublicOnlyRoute>
           }
         />
 

@@ -59,38 +59,16 @@
 
 .actions {
   display: flex;
-  justify-content: space-between;
-  gap: 1.6rem;
+  justify-content: center;
   margin-top: 2.4rem;
 }
 
-.actions button,
-.simulationBox button {
+.actions button {
   border: 0;
   background: transparent;
   color: var(--primary);
   cursor: pointer;
   font-weight: 700;
-}
-
-.feedbackMessage {
-  margin-top: 2.4rem;
-  text-align: center;
-  font-weight: 700;
-}
-
-.simulationBox {
-  text-align: center;
-}
-
-.simulationBox h1 {
-  font-size: 2.4rem;
-  margin-bottom: 1.6rem;
-}
-
-.simulationBox p {
-  color: var(--gray-300);
-  margin-bottom: 2.4rem;
 }
 
 .tokenContainer {
@@ -100,12 +78,12 @@
 
   gap: 1rem;
 
-  margin: 1rem 0;
+  margin: 1.6rem 0;
 
-  padding: 1rem;
+  padding: 1.2rem;
 
-  border: 1px solid var(--primary-color);
-  border-radius: 8px;
+  border: 1px solid var(--primary);
+  border-radius: 0.8rem;
 
   background: rgba(255, 255, 255, 0.03);
 }
@@ -113,7 +91,9 @@
 .tokenValue {
   flex: 1;
 
-  font-size: 0.9rem;
+  font-size: 1.8rem;
+
+  line-height: 1.6;
 
   word-break: break-all;
 }
@@ -125,13 +105,14 @@
 
   cursor: pointer;
 
-  border: none;
-  border-radius: 6px;
+  border: 0;
+  border-radius: 0.6rem;
 
-  padding: 0.75rem;
+  padding: 0.8rem;
 
   background: transparent;
-  color: var(--primary-color);
+
+  color: var(--primary);
 
   transition: 0.2s;
 }
