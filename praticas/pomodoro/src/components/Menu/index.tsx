@@ -11,12 +11,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { RouterLink } from '../RouterLink';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { useTaskContext } from '../../contexts/TaskContext/useTaskContext';
+import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
 
 type AvailableThemes = 'dark' | 'light';
 
 export function Menu() {
   const navigate = useNavigate();
   const { logout } = useAuthContext();
+  const { dispatch } = useTaskContext();
 
   const [theme, setTheme] = useState<AvailableThemes>(() => {
     const storageTheme =
@@ -44,8 +47,13 @@ export function Menu() {
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
   ) {
     event.preventDefault();
-
+  
+    dispatch({
+      type: TaskActionTypes.RESET_STATE,
+    });
+  
     logout();
+  
     navigate('/');
   }
 

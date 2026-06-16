@@ -1,52 +1,80 @@
 import { useCallback, useMemo, useState } from 'react';
-import { AuthContext } from './AuthContext';
-import { validateMockLogin } from '../../utils/validateMockLogin';
+import { AuthContext, type AuthUser } from './AuthContext';
+import { loginUser } from '../../services/api';
 
 type AuthContextProviderProps = {
-children: React.ReactNode;
+  children: React.ReactNode;
 };
 
 const STORAGE_KEY = 'kratos-auth';
 
+type AuthStorage = {
+  token: string;
+  user: AuthUser;
+};
+
 export function AuthContextProvider({
-children,
+  children,
 }: AuthContextProviderProps) {
-const [isAuthenticated, setIsAuthenticated] = useState(
-() => sessionStorage.getItem(STORAGE_KEY) === '1',
-);
+  const [authData, setAuthData] =
+    useState<AuthStorage | null>(() => {
+      const storedData =
+        sessionStorage.getItem(STORAGE_KEY);
 
-const login = useCallback(
-(username: string, password: string) => {
-const isValid = validateMockLogin(username, password);
+      if (!storedData) return null;
 
-  if (isValid) {
-    sessionStorage.setItem(STORAGE_KEY, '1');
-    setIsAuthenticated(true);
-  }
+      return JSON.parse(storedData);
+    });
 
-  return isValid;
-},
-[],
+  const login = useCallback(
+    async (
+      email: string,
+      password: string,
+    ) => {
+      try {
+        const data = await loginUser({
+          email,
+          password,
+        });
 
-);
+        const authStorage: AuthStorage = {
+          token: data.token,
+          user: data.user,
+        };
 
-const logout = useCallback(() => {
-sessionStorage.removeItem(STORAGE_KEY);
-setIsAuthenticated(false);
-}, []);
+        sessionStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(authStorage),
+        );
 
-const value = useMemo(
-() => ({
-isAuthenticated,
-login,
-logout,
-}),
-[isAuthenticated, login, logout],
-);
+        setAuthData(authStorage);
 
-return (
-<AuthContext.Provider value={value}>
-{children}
-</AuthContext.Provider>
-);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [],
+  );
+
+  const logout = useCallback(() => {
+    sessionStorage.removeItem(STORAGE_KEY);
+    setAuthData(null);
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      isAuthenticated: !!authData,
+      user: authData?.user ?? null,
+      login,
+      logout,
+    }),
+    [authData, login, logout],
+  );
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }

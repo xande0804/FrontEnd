@@ -1,23 +1,21 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 export const settingsRouter = Router();
 
-settingsRouter.get('/', async (_request, response) => {
-  let settings = await prisma.settings.findUnique({
+settingsRouter.use(authMiddleware);
+
+settingsRouter.get('/', async (request, response) => {
+  const settings = await prisma.settings.findUnique({
     where: {
-      id: 1,
+      userId: request.userId,
     },
   });
 
   if (!settings) {
-    settings = await prisma.settings.create({
-      data: {
-        id: 1,
-        workTime: 25,
-        shortBreakTime: 5,
-        longBreakTime: 15,
-      },
+    return response.status(404).json({
+      error: 'Configurações não encontradas',
     });
   }
 
@@ -37,17 +35,11 @@ settingsRouter.put('/', async (request, response) => {
     });
   }
 
-  const settings = await prisma.settings.upsert({
+  const settings = await prisma.settings.update({
     where: {
-      id: 1,
+      userId: request.userId,
     },
-    update: {
-      workTime,
-      shortBreakTime,
-      longBreakTime,
-    },
-    create: {
-      id: 1,
+    data: {
       workTime,
       shortBreakTime,
       longBreakTime,
@@ -55,4 +47,4 @@ settingsRouter.put('/', async (request, response) => {
   });
 
   return response.json(settings);
-}); 
+});
